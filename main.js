@@ -126,7 +126,6 @@ AV.Cloud.define('kaka_get_workertime', function(request, response) {
 	var user = new worker();
 	var query = new AV.Query(worker_time);
 
-    console.log("year_month", year_month);
     user.id = request.params.user_id;
 	query.equalTo("worker", user);
 	query.equalTo("year_month", year_month);
@@ -227,7 +226,6 @@ var check_request_params_style = function(request, response) {
     var params = request.params;
     var lock_date_num = params.lock_dates.length;
     var unlock_date_num = params.unlock_dates.length;
-    console.log(params); 
     // 用户ID必填
     if (typeof(params.user_id) == "undefined" || params.user_id.length === 0) {
         response.success(ERROR_MSG.ERR_USERID_MUST_HAVE);
@@ -236,7 +234,6 @@ var check_request_params_style = function(request, response) {
 
     // 解锁日期可选
     if (typeof(params.unlock_dates) != "undefined") { 
-        console.log("check unlock_date");
         if (!check_continuous_date(params.unlock_dates)) {
             response.success(ERROR_MSG.ERR_UNLOCK_DATE_NO_CONTINUE);
             return false;
@@ -245,7 +242,6 @@ var check_request_params_style = function(request, response) {
 
     // 加锁日期必填
     if (typeof(params.lock_dates) != "undefined") {
-        console.log("check lock_date");
         if (lock_date_num === 0) {
             response.success(ERROR_MSG.ERR_LOCK_DATE_MUST_HAVE);
             return false;
@@ -310,7 +306,6 @@ AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
 
                 var now_date = new Date();
                 if (parseInt(unlock_date_array[0] / 100) < now_date.getFullYear() * 100 + now_date.getMonth() + 1) {
-                    console.log("news date:" + now_date, "get_month:" + now_date.getMonth());
                     resolve(ERROR_MSG.ERR_UNLOCK_DATE_OVERDUE);
                 }
 
@@ -334,18 +329,15 @@ AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
                                 worker_time[i] = results[i];
                                 var preorder = worker_time[i].get('preorder');
                                 if (0 === preorder) {
-                                    console.log("no unlock");
                                     state_code = -2;
                                 }
                                 else {
-                                    console.log("start unlock");
                                     worker_time[i].set("preorder", 0); 
                                 }
                             }
                         }
 
                         if (-1 == state_code) {
-                            console.log("fail state_code:" + state_code);
                             resolve(ERROR_MSG.ERR_DATE_UNLOCK_NOHAVE);
                         }
 
@@ -353,11 +345,9 @@ AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
                         AV.Object.saveAll(worker_time, { 
                             success : function(work_time) {
                                 if (-2 == state_code) {
-                                    console.log("fail state_code:" + state_code);
                                     resolve(ERROR_MSG.ERR_DATE_UNLOCK_FAILED);
                                 }
                                 else {
-                                    console.log("success state_code:" + state_code);
                                     resolve(RESULT_MSG.RET_OK);
                                 }
                             }, 
@@ -426,13 +416,11 @@ AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
                                     worker_time[i].increment("preorder"); 
                                 }
                                 else if (1 == preorder){
-                                    console.log("slow 1");
                                     state_code = -1;
                                 }
                                 else if(1 < preorder) {
                                     //workerTime.fetchWhenSave(true);
                                     worker_time[i].increment("preorder", -1);
-                                    console.log("slow 2");
                                     state_code = -2;
                                 }
                             }
@@ -442,11 +430,9 @@ AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
                         AV.Object.saveAll(worker_time, { 
                             success : function(work_time) {
                                 if (0 < state_code) {
-                                    console.log("fail state_code:" + state_code);
                                     resolve(ERROR_MSG.ERR_PREORDER_SLOW);
                                 }
                                 else {
-                                    console.log("success state_code:" + state_code);
                                     resolve(RESULT_MSG.RET_OK);
                                 }
                             }, 
@@ -513,13 +499,11 @@ AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
                             worker_time[i].increment("preorder"); 
                         }
                         else if (1 == preorder){
-                            console.log("slow 1");
                             state_code = -1;
                         }
                         else if(1 < preorder) {
                             //workerTime.fetchWhenSave(true);
                             worker_time[i].increment("preorder", -1);
-                            console.log("slow 2");
                             state_code = -2;
                         }
                     }
@@ -529,17 +513,13 @@ AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
                 AV.Object.saveAll(worker_time, { 
                     success : function(work_time) {
                         if (0 < state_code) {
-                            console.log("fail state_code:" + state_code);
                             response.success(ERROR_MSG.ERR_PREORDER_SLOW);
                         }
                         else {
-                            console.log("success state_code:" + state_code);
                             if (single) {
-                                console.log("success sync single = true");
                                 response.success(RESULT_MSG.RET_OK);
                             }
                             else {
-                                console.log("success sync single = false");
                                 sync_workertime_unlock(request.params.unlock_dates);
                             }
                         }
@@ -579,7 +559,6 @@ AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
 
         var now_date = new Date();
         if (parseInt(unlock_date_array[0] / 100) < now_date.getFullYear() * 100 + now_date.getMonth() + 1) {
-            console.log("news date:" + now_date, "get_month:" + now_date.getMonth());
             response.success(ERROR_MSG.ERR_UNLOCK_DATE_OVERDUE);
             return
         }
@@ -604,18 +583,15 @@ AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
                         worker_time[i] = results[i];
                         var preorder = worker_time[i].get('preorder');
                         if (0 === preorder) {
-                            console.log("no unlock");
                             state_code = -2;
                         }
                         else {
-                            console.log("start unlock");
                             worker_time[i].set("preorder", 0); 
                         }
                     }
                 }
  
                 if (-1 == state_code) {
-                    console.log("fail state_code:" + state_code);
                     response.success(ERROR_MSG.ERR_DATE_UNLOCK_NOHAVE);
                     return;
                 }
@@ -624,11 +600,9 @@ AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
                 AV.Object.saveAll(worker_time, { 
                     success : function(work_time) {
                         if (-2 == state_code) {
-                            console.log("fail state_code:" + state_code);
                             response.success(ERROR_MSG.ERR_DATE_UNLOCK_FAILED);
                         }
                         else {
-                            console.log("success state_code:" + state_code);
                             response.success(RESULT_MSG.RET_OK);
                         }
                     }, 
@@ -653,7 +627,6 @@ AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
 		var lock_date_len = lock_dates.length;
 		var lock_date_params = [];
 
-		console.log("request for format: " + JSON.stringify(request));
 		for(var i = 0 ; i < lock_date_len ; i++){
 			lock_date_params[i] = lock_dates[i];
 			lock_date_params[i] = parseInt(lock_date_params[i].split("-").join(""));
@@ -662,10 +635,8 @@ AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
 		var lock_date_query = new AV.Query("kaka_worker_time");
 		lock_date_query.containedIn("date" , lock_date_params);
 	
-        console.log("check lock");
         lock_date_query.find({
             success : function(results) {
-                console.log("锁定查询结果数:" + results.length + " | " + JSON.stringify(results));
                 if (results.length === 0) {
                     sync_workertime_lock(lock_dates, true);
                 }
@@ -677,7 +648,6 @@ AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
                             return;
                         }
                     }
-                    console.log("start unlock data");
                     check_unlock_dates(mode);
                 }
             },
@@ -706,7 +676,6 @@ AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
             }
         }
 
-		//console.log("request: " + JSON.stringify(request));
 		var unlock_date_params = [];	
         for (var i = 0 ; i < unlock_date_num ; i++) {
 			unlock_date_params[i] = unlock_dates[i];
@@ -717,28 +686,24 @@ AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
 		unlock_dates_query.containedIn("date", unlock_date_params);
 		unlock_dates_query.equalTo("preorder", 1);
 
-        console.log("begin unlock");
         unlock_dates_query.find({
             success : function(results) {
-                console.log("解锁查询结果数:" + results.length + " | " + JSON.stringify(results));
                 if (results.length === 0) {
                     response.success(ERROR_MSG.ERR_TIME_NO_UNLOCK);
                     return;
                 }
 
                 if ("async" == mode) {
-                    console.log("async mode:" + mode);
                     var promises = [];
                     promises.push(async_workertime_lock_promise(request.params.lock_dates));
                     promises.push(async_workertime_unlock_promise(request.params.unlock_dates));
 
                     return AV.Promise.when(promises).then(
                         function(v1, v2) {
-                            console.log("async ok");
                             if (v1 == RESULT_MSG.RET_OK &&
                                 v2 == RESULT_MSG.RET_OK) {
                                     response.success(RESULT_MSG.RET_OK);
-                                }
+                            }
                             else {
                                 /*if (v1 == RESULT_MSG.RET_OK) {
                                     response.success(v1);
@@ -750,13 +715,11 @@ AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
                             }
                         }, 
                         function(error){
-                            console.log("async failed");
                             response.error(RESULT_MSG.RET_FAIL);
                         }
                     );
                 }
                 else if ("sync" == mode) {
-                    console.log("sync mode:" + mode);
                     sync_workertime_lock(request.params.lock_dates, false);
                 }
             }, 
@@ -785,238 +748,3 @@ AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
 
 	check_lock_dates(mode);
 });
-
-/******************************* test *************************************/
-
-/**
-* 参数验证
-*
-* @return boolean
-*/ 
-AV.Cloud.define('check_request_style', function(request , response) {
-	var check_params = function() {
-		var params = request.params;
-		var lock_date_num = params.lock_dates.length;
-		var unlock_date_num = params.unlock_dates.length;
-		console.log(params); 
-		// 用户ID必填
-		if (typeof(params.user_id) == "undefined" || params.user_id.length === 0) {
-			response.success(ERROR_MSG.ERR_USERID_MUST_HAVE);
-			return false;
-		}
-		
-		// 解锁日期可选
-		if (typeof(params.unlock_dates) != "undefined") { 
-            console.log("check unlock_date");
-	        if (!check_continuous_date(params.unlock_dates)) {
-			    response.success(ERROR_MSG.ERR_UNLOCK_DATE_NO_CONTINUE);
-                return false;
-            }
-		} 
-		
-		// 加锁日期必填
-		if (typeof(params.lock_dates) != "undefined") {
-            console.log("check lock_date");
-			if (lock_date_num === 0) {
-				response.success(ERROR_MSG.ERR_LOCK_DATE_MUST_HAVE);
-				return false;
-			}
-
-	        if (!check_continuous_date(params.lock_dates)) {
-				response.success(ERROR_MSG.ERR_LOCK_DATE_NO_CONTINUE);
-                return false;
-            }
-		}
-        else {
-			response.error(ERROR_MSG.ERR_DATE_STYLE);
-			return false;
-		}
-		
-		return true;
-	};
-
-	check_params();
-});
-
-AV.Cloud.define('sync_more_workertime_lock', function(request , response) {
-    var sync_workertime_lock = function(lock_dates) {
-        var state_code = 0;
-        var lock_date_num = lock_dates.length;
-        var lock_date_array = [];
-        
-        if (typeof(lock_dates) == "undefined") {
-            response.success(ERROR_MSG.ERR_DATE_STYLE);
-            return;
-        }
-        else {
-            if (lock_date_num === 0) {
-			    response.success(ERROR_MSG.ERR_LOCK_DATE_MUST_HAVE);
-                return; 
-            }
-        }
-
-
-        for(var i = 0 ; i < lock_date_num ; i++){
-			lock_date_array[i] = lock_dates[i];
-			lock_date_array[i] = parseInt(lock_date_array[i].split("-").join(""));
-		}
-
-        var user_collection = AV.Object.extend("_User");
-        var user_obj = new user_collection();
-        var kaka_worker_time_collection = AV.Object.extend('kaka_worker_time');
-		var lock_date_query = new AV.Query("kaka_worker_time");
-        user_obj.id = request.params.user_id;
-        lock_date_query.equalTo("worker", user_obj);
-		lock_date_query.containedIn("date" , lock_date_array);
-
-        var worker_time = [];
-        lock_date_query.find ({
-            success: function(results) {
-                for (var i = 0; i < lock_date_num; i++) {
-                    if (results.length === 0) {
-                        worker_time[i] = new kaka_worker_time_collection();
-                        worker_time[i].set("worker", user_obj);
-                        worker_time[i].set("preorder", 1);
-                        worker_time[i].set("date", lock_date_array[i]);
-                        worker_time[i].set("year_month", parseInt(lock_date_array[i] / 100));
-                        worker_time[i].set("days", lock_date_array[i] % 100);
-                        worker_time[i].set("sure", 0);
-                    }
-                    else {
-                        worker_time[i] = results[i];
-                        var preorder = worker_time[i].get('preorder');
-                        if (0 === preorder) {
-                            worker_time[i].increment("preorder"); 
-                        }
-                        else if (1 == preorder){
-                            console.log("slow 1");
-                            state_code = -1;
-                        }
-                        else if(1 < preorder) {
-                            //workerTime.fetchWhenSave(true);
-                            worker_time[i].increment("preorder" , -1);
-                            console.log("slow 2");
-                            state_code = -2;
-                        }
-                    }
-                }
-
-                // 添加一天加锁的预约时间
-                AV.Object.saveAll(worker_time, { 
-                    success : function(work_time) {
-                        if (0 < state_code) {
-                            console.log("fail state_code:" + state_code);
-                            response.success(ERROR_MSG.ERR_PREORDER_SLOW);
-                        }
-                        else {
-                            console.log("success state_code:" + state_code);
-                            response.success(RESULT_MSG.RET_OK);
-                        }
-                    }, 
-                    error : function(work_time, error) {
-                        //reject(ERROR_MSG.ERR_DATE_LOCK_FAILED);
-                        response.error(error);
-                    }
-                });	 
-            }, 
-            error : function(error) {
-                response.error(error);
-            }
-        });
-	};
-
-    sync_workertime_lock(request.params.lock_dates);
-});
-
-AV.Cloud.define('sync_more_workertime_unlock', function(request, response) {
-    var sync_workertime_unlock = function(unlock_dates) {
-        var state_code = 0;
-        var unlock_date_num = unlock_dates.length;
-        var unlock_date_array = [];
-        
-        if (typeof(unlock_dates) == "undefined") {
-            response.success(ERROR_MSG.ERR_DATE_STYLE);
-            return;
-        }
-        else {
-            if (lock_date_num === 0) {
-			    response.success(ERROR_MSG.ERR_LOCK_DATE_MUST_HAVE);
-                return; 
-            }
-        }
-
-        for(var i = 0 ; i < unlock_date_num ; i++){
-			unlock_date_array[i] = unlock_dates[i];
-			unlock_date_array[i] = parseInt(unlock_date_array[i].split("-").join(""));
-		}
-
-        var now_date = new Date();
-        if (parseInt(unlock_date_array[0] / 100) < now_date.getFullYear() * 100 + now_date.getMonth() + 1) {
-            console.log("news date:" + now_date, "get_month:" + now_date.getMonth());
-            response.success(ERROR_MSG.ERR_UNLOCK_DATE_OVERDUE);
-            return
-        }
-
-        var user_collection = AV.Object.extend("_User");
-        var user_obj = new user_collection();
-        var kaka_worker_time_collection = AV.Object.extend('kaka_worker_time');
-		var unlock_date_query = new AV.Query("kaka_worker_time");
-        user_obj.id = request.params.user_id;
-        unlock_date_query.equalTo("worker", user_obj);
-		unlock_date_query.containedIn("date" , unlock_date_array);
-
-        var worker_time = [];
-        unlock_date_query.find ({
-            success : function(results) {
-                for (var i = 0; i < unlock_date_num; i++) {
-                    if (results.length === 0) {
-                        state_code = -1;
-                        break;
-                    }
-                    else {
-                        worker_time[i] = results[i];
-                        var preorder = worker_time[i].get('preorder');
-                        if (0 === preorder) {
-                            console.log("no unlock");
-                            state_code = -2;
-                        }
-                        else {
-                            console.log("start unlock");
-                            worker_time[i].set("preorder", 0); 
-                        }
-                    }
-                }
- 
-                if (-1 == state_code) {
-                    console.log("fail state_code:" + state_code);
-                    response.success(ERROR_MSG.ERR_DATE_UNLOCK_NOHAVE);
-                    return;
-                }
-                
-                // 添加一天加锁的预约时间
-                AV.Object.saveAll(worker_time, { 
-                    success : function(work_time) {
-                        if (-2 == state_code) {
-                            console.log("fail state_code:" + state_code);
-                            response.success(ERROR_MSG.ERR_DATE_UNLOCK_FAILED);
-                        }
-                        else {
-                            console.log("success state_code:" + state_code);
-                            response.success(RESULT_MSG.RET_OK);
-                        }
-                    }, 
-                    error : function(work_time, error) {
-                        //reject(ERROR_MSG.ERR_DATE_LOCK_FAILED);
-                        response.error(error);
-                    }
-                });	 
-            }, 
-            error : function(error) {
-                response.error(error);
-            }
-        });
-	};
-
-    sync_workertime_unlock(request.params.unlock_dates);
-});
-
