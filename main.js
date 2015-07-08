@@ -1,23 +1,25 @@
 var ERROR_MSG = {
-    'ERR_USER_MOBILE_MUST_HAVE':'{"state":"error", "code":0, "msg":"手机号不能为空"}', 
-    'ERR_USER_PASSWORD_MUST_HAVE':'{"state":"error", "code":1, "msg":"密码不能为空"}', 
-    'ERR_USER_EXITS':'{"state":"error", "code":2, "msg":"用户已存在"}', 
-    'ERR_MONTH_NOT_PREORDER':'{"state":"error", "code":3, "msg":"当月无可预约时间}',
-    'ERR_PREORDER_SLOW':'{"state":"error", "code":4, "msg":"当前日期已被预约，您来晚一步"}', 
-    'ERR_DATE_LOCK_FAILED':'{"state":"error", "code":5, "msg":"日期锁定失败"}', 
-    'ERR_DATE_UNLOCK_NOHAVE':'{"state":"error", "code":6, "msg":"日期解锁失败, 日期不存在"}', 
-    'ERR_DATE_UNLOCK_FAILED':'{"state":"error", "code":7, "msg":"日期解锁失败, 日期已被解锁"}',
-    'ERR_USERID_MUST_HAVE':'{"state":"error", "code":8, "msg":"用户ID必填"}', 
-    'ERR_LOCK_DATE_NO_CONTINUE':'{"state":"error", "code":9, "msg":"加锁日期不连续"}', 
-    'ERR_UNLOCK_DATE_NO_CONTINUE':'{"state":"error", "code":10, "msg":"解锁日期不连续"}', 
-    'ERR_LOCK_DATE_MUST_HAVE':'{"state":"error", "code":11, "msg":"加锁日期必填"}', 
-    'ERR_TIME_NO_UNLOCK':'{"state":"error", "code":12, "msg":"所选时间段不能被解锁"}', 
-    'ERR_TIME_NO_LOCK':'{"state":"error", "code":13, "msg":"所选时间段不能被锁定"}',
-    'ERR_LOCK_UNLOC_NO_MATCHING':'{"state":"error", "code":14, "msg":"所选时间段锁定与解锁不匹配"}',
-    'ERR_DATE_STYLE':'{"state":"error", "code":15, "msg":"时间样式错误"}',
-    'ERR_UNLOCK_DATE_OVERDUE':'{"state":"error", "code":16, "msg":"解锁时间样已过期"}',
-    'ERR_MODE_STYLE':'{"state":"error", "code":17, "msg":"模式样式错误"}',
-    'ERR_MODE_MUST_HAVE':'{"state":"error", "code":18, "msg":"时间请求模式必须有"}'
+	'ERR_USER_MOBILE_MUST_HAVE':'{"state":"error", "code":0, "msg":"手机号不能为空"}', 
+	'ERR_USER_PASSWORD_MUST_HAVE':'{"state":"error", "code":1, "msg":"密码不能为空"}', 
+	'ERR_USER_EXITS':'{"state":"error", "code":2, "msg":"用户已存在"}', 
+	'ERR_PREORDER_SLOW':'{"state":"error", "code":3, "msg":"当前日期已被预约，您来晚一步"}', 
+	'ERR_DATE_LOCK_FAILED':'{"state":"error", "code":4, "msg":"日期锁定失败"}', 
+	'ERR_DATE_UNLOCK_NOHAVE':'{"state":"error", "code":5, "msg":"日期解锁失败, 日期不存在"}', 
+	'ERR_DATE_UNLOCK_FAILED':'{"state":"error", "code":6, "msg":"日期解锁失败, 日期已被解锁"}',
+	'ERR_USERID_MUST_HAVE':'{"state":"error", "code":7, "msg":"用户ID必填"}', 
+	'ERR_LOCK_DATE_NO_CONTINUE':'{"state":"error", "code":8, "msg":"加锁日期不连续"}', 
+	'ERR_UNLOCK_DATE_NO_CONTINUE':'{"state":"error", "code":9, "msg":"解锁日期不连续"}', 
+	'ERR_LOCK_DATE_MUST_HAVE':'{"state":"error", "code":10, "msg":"加锁日期必填"}', 
+	'ERR_TIME_NO_UNLOCK':'{"state":"error", "code":11, "msg":"所选时间段不能被解锁"}', 
+	'ERR_TIME_NO_LOCK':'{"state":"error", "code":12, "msg":"所选时间段不能被锁定"}',
+	'ERR_LOCK_UNLOC_NO_MATCHING':'{"state":"error", "code":13, "msg":"所选时间段锁定与解锁不匹配"}',
+	'ERR_DATE_STYLE':'{"state":"error", "code":14, "msg":"时间样式错误"}',
+	'ERR_UNLOCK_DATE_OVERDUE':'{"state":"error", "code":15, "msg":"解锁时间样已过期"}',
+	'ERR_MODE_STYLE':'{"state":"error", "code":16, "msg":"模式样式错误"}',
+	'ERR_MODE_MUST_HAVE':'{"state":"error", "code":17, "msg":"时间请求模式必须有"}',
+	'ERR_COUNTERID_MUST_HAVE':'{"state":"error", "code":18, "msg":"counter ID必填"}', 
+	'ERR_BELONGID_MUST_HAVE':'{"state":"error", "code":19, "msg":"belong ID必填"}',
+	'ERR_BELONGTYPE_MUST_HAVE':'{"state":"error", "code":20, "msg":"belong type必填"}'
 }; 
 
 var RESULT_MSG = {
@@ -34,9 +36,9 @@ var RESULT_MSG = {
 *           ERROR  - system error
 */
 AV.Cloud.define('kaka_register', function(request, response) {
-    var mobile = request.params.mobilePhoneNumber;
-    var password = request.params.password;
-    var username = request.params.username;
+	var mobile = request.params.mobilePhoneNumber;
+	var password = request.params.password;
+	var username = request.params.username;
 
     if (typeof(mobile) == "undefined" || mobile.length === 0) {
         response.success(ERROR_MSG.ERR_USER_MOBILE_MUST_HAVE);
@@ -48,19 +50,19 @@ AV.Cloud.define('kaka_register', function(request, response) {
         return;
     }
 
-    var user = AV.Object.extend("_User");
-    var query = new AV.Query(user);
-    query.equalTo("mobilePhoneNumber", mobile);
-    query.find({
-        success :function(results) {
-            if (typeof(results) == "undefined" || results.length === 0){
-                var user_obj = new AV.User();
-                 
+	var user = AV.Object.extend("_User");
+	var query = new AV.Query(user);
+	query.equalTo("mobilePhoneNumber", mobile);
+	query.find({
+		success :function(results) {
+			if (typeof(results) == "undefined" || results.length === 0){
+				var user_obj = new AV.User();
+			     
                 if (typeof(username) == "undefined" || username.length === 0) {
                     user_obj.set("username", request.params.mobilePhoneNumber);
                 }
-                user_obj.set("mobilePhoneNumber", request.params.mobilePhoneNumber);
-                user_obj.set("password", request.params.password);
+			    user_obj.set("mobilePhoneNumber", request.params.mobilePhoneNumber);
+			    user_obj.set("password", request.params.password);
                 user_obj.signUp(null, {
                     success: function(user_obj) {
                         response.success(RESULT_MSG.RET_OK);
@@ -73,77 +75,71 @@ AV.Cloud.define('kaka_register', function(request, response) {
                 return;
             }
 
-            // 用户存在
-            var user_obj = results[0];
-            if (user_obj.get("mobilePhoneVerified")) {
-                // 手机号已经验证
-                // 返回错误信息
-                response.success(ERROR_MSG.ERR_USER_EXITS);
+			// 用户存在
+			var user_obj = results[0];
+			if (user_obj.get("mobilePhoneVerified")) {
+				// 手机号已经验证
+				// 返回错误信息
+				response.success(ERROR_MSG.ERR_USER_EXITS);
                 return;
-            }
+			}
             else {
-                // 手机号未验证
-                // 更新密码
-                user_obj.set("password", request.params.password);
-                user_obj.save(null , {
-                    success :function(user) {
-                        // 发送手机号验证短信
-                        AV.User.requestMobilePhoneVerify(request.params.mobilePhoneNumber).then(
+				// 手机号未验证
+				// 更新密码
+				user_obj.set("password", request.params.password);
+				user_obj.save(null , {
+					success :function(user) {
+						// 发送手机号验证短信
+						AV.User.requestMobilePhoneVerify(request.params.mobilePhoneNumber).then(
                         function(){
-                           //发送成功
-                           response.success(RESULT_MSG.RET_OK);
-                        }, 
+						   //发送成功
+						   response.success(RESULT_MSG.RET_OK);
+						}, 
                         function(error){
-                           //发送失败
-                           response.error(error);
-                        });
-                    },
-                    error:function(user, error){
-                        response.error(error);
-                    }
-                });    
-            }
-        },
-        error:function(error){
-            response.error(error);    
-        }
-    })
+						   //发送失败
+						   response.error(error);
+						});
+					},
+					error:function(user, error){
+						response.error(error);
+					}
+				});	
+			}
+		},
+		error:function(error){
+			response.error(error);	
+		}
+	})
 });
 
 /**
 * brief   : 获取摄影师选定月份已被预约时间
-* @param  : request - {"user_id":"xxxxxxxxxxxxxxx", "date":"201506}}
+* @param  : request - {"user_id":"xxxxxxxxxxxxxxx", "date":"2015-06}}
 *           response - return
 * @return : results -query result array
 *           ERROR  - system error or define error
 */
 AV.Cloud.define('kaka_get_workertime', function(request, response) {
-    var date = request.params.date;
+	var date = request.params.date;
     var date_split = date.split("-");
-    var year_month = parseInt(date_split[0] * 100) + parseInt(date_split[1]);
-    var worker_time = AV.Object.extend("kaka_worker_time");
-    var worker = AV.Object.extend("_User");
-    var user = new worker();
-    var query = new AV.Query(worker_time);
+	var year_month = parseInt(date_split[0] * 100) + parseInt(date_split[1]);
+	var worker_time = AV.Object.extend("kaka_worker_time");
+	var worker = AV.Object.extend("_User");
+	var user = new worker();
+	var query = new AV.Query(worker_time);
 
     user.id = request.params.user_id;
-    query.equalTo("worker", user);
-    query.equalTo("year_month", year_month);
-    query.equalTo("preorder", 1);
-    query.find({
-        success : function(results) {
-            // 查询条数为0时，提示无可预约时间
-            if(results.length === 0){
-                 response.success(ERROR_MSG.ERR_MONTH_NOT_PREORDER);
-                 return;
-            }
-        
-            response.success(results);
-         },
-         error : function(error) {
+	query.equalTo("worker", user);
+	query.equalTo("year_month", year_month);
+	query.equalTo("preorder", 1);
+	query.find({
+	    success : function(results) {	
+		    response.success(results);
+	     },
+	     error : function(error) {
              response.error(error);
-         }
-    });  
+	     }
+	});  
 });
 
 /**
@@ -156,7 +152,7 @@ AV.Cloud.define('kaka_get_workertime', function(request, response) {
 AV.Cloud.define('kaka_get_worker_cameraman', function(request, response) {
     var role_collection = AV.Object.extend("_Role");
     var role_obj = new role_collection();
-    var worker_query = new AV.Query("_User");
+	var worker_query = new AV.Query("_User");
 
     role_obj.id = "555c2a42e4b0b7e69366bff2";
     worker_query.equalTo("role", role_obj);
@@ -203,14 +199,14 @@ var get_date_diff_number = function(date_1 , date_2) {
 *           false - no continue
 */
 var check_continuous_date = function(dates) {
-    var dates_num = dates.length;
-    for (var i = 0; i < dates_num - 1; i++) {
-        if (get_date_diff_number(dates[i], dates[i + 1]) != 1) {
-            return false;
-        }
-    }
+	var dates_num = dates.length;
+	for (var i = 0; i < dates_num - 1; i++) {
+		if (get_date_diff_number(dates[i], dates[i + 1]) != 1) {
+			return false;
+		}
+	}
 
-    return true;
+	return true;
 }
 
 /**
@@ -271,20 +267,20 @@ var check_request_params_style = function(request, response) {
 *           error - define error or system error
 */
 AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
-    // 先加锁，后解锁
-    // 如果解锁日期为空，则不解锁
-    // 加锁日期为必填
-    
-    // 1. 查询摄影师加锁日期是否存在
-    //    1. 存在，判断是否加锁
-    //       1. 加锁，返回错误 -- 已被预约
-    //       2. 解锁，直接加锁
-    //          1. 加锁结果大于 1，则将此值修改为1，返回错误
-    //          1. 加锁结果等于 1， 返回正常
-    //    2. 不存在，直接添加一条加锁的预约时间
+	// 先加锁，后解锁
+	// 如果解锁日期为空，则不解锁
+	// 加锁日期为必填
+	
+	// 1. 查询摄影师加锁日期是否存在
+	//    1. 存在，判断是否加锁
+	//       1. 加锁，返回错误 -- 已被预约
+	//       2. 解锁，直接加锁
+	//          1. 加锁结果大于 1，则将此值修改为1，返回错误
+	//          1. 加锁结果等于 1， 返回正常
+	//    2. 不存在，直接添加一条加锁的预约时间
  
-    var async_workertime_unlock_promise = function(unLock_dates) {
-        return new AV.Promise(function(resolve, reject) { 
+	var async_workertime_unlock_promise = function(unLock_dates) {
+		return new AV.Promise(function(resolve, reject) { 
             var async_workertime_unlock = function(unlock_dates) {
                 var state_code = 0;
                 var unlock_date_num = unlock_dates.length;
@@ -295,7 +291,7 @@ AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
                 }
                 else {
                     if (lock_date_num === 0) {
-                        resolve(ERROR_MSG.ERR_LOCK_DATE_MUST_HAVE);
+			            resolve(ERROR_MSG.ERR_LOCK_DATE_MUST_HAVE);
                     }
                 }
 
@@ -355,7 +351,7 @@ AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
                                 //reject(ERROR_MSG.ERR_DATE_LOCK_FAILED);
                                 reject(error);
                             }
-                        });     
+                        });	 
                     }, 
                     error : function(error) {
                         reject(error);
@@ -364,8 +360,8 @@ AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
             };
 
             async_workertime_unlock(request.params.unlock_dates);
-        });
-    };
+		});
+	};
 
     var async_workertime_lock_promise = function(lock_dates) { 
         return new AV.Promise(function(resolve, reject) { 
@@ -379,7 +375,7 @@ AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
                 }
                 else {
                     if (lock_date_num === 0) {
-                        resolve(ERROR_MSG.ERR_LOCK_DATE_MUST_HAVE);
+			            resolve(ERROR_MSG.ERR_LOCK_DATE_MUST_HAVE);
                     }
                 }
 
@@ -440,7 +436,7 @@ AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
                                 //reject(ERROR_MSG.ERR_DATE_LOCK_FAILED);
                                 reject(error);
                             }
-                        });     
+                        });	 
                     }, 
                     error : function(error) {
                         reject(error);
@@ -467,17 +463,17 @@ AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
         }
 
         for(var i = 0 ; i < lock_date_num ; i++){
-            lock_date_array[i] = lock_dates[i];
-            lock_date_array[i] = parseInt(lock_date_array[i].split("-").join(""));
-        }
+			lock_date_array[i] = lock_dates[i];
+			lock_date_array[i] = parseInt(lock_date_array[i].split("-").join(""));
+		}
 
         var user_collection = AV.Object.extend("_User");
         var user_obj = new user_collection();
         var kaka_worker_time_collection = AV.Object.extend('kaka_worker_time');
-        var lock_date_query = new AV.Query("kaka_worker_time");
+		var lock_date_query = new AV.Query("kaka_worker_time");
         user_obj.id = request.params.user_id;
         lock_date_query.equalTo("worker", user_obj);
-        lock_date_query.containedIn("date" , lock_date_array);
+		lock_date_query.containedIn("date" , lock_date_array);
 
         var worker_time = [];
         lock_date_query.find ({
@@ -528,13 +524,13 @@ AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
                         //reject(ERROR_MSG.ERR_DATE_LOCK_FAILED);
                         response.error(error);
                     }
-                });     
+                });	 
             }, 
             error : function(error) {
                 response.error(error);
             }
         });
-    };
+	};
     
     var sync_workertime_unlock = function(unlock_dates) {
         var state_code = 0;
@@ -547,15 +543,15 @@ AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
         }
         else {
             if (unlock_date_num === 0) {
-                response.success(ERROR_MSG.ERR_LOCK_DATE_MUST_HAVE);
+			    response.success(ERROR_MSG.ERR_LOCK_DATE_MUST_HAVE);
                 return; 
             }
         }
 
         for(var i = 0 ; i < unlock_date_num ; i++){
-            unlock_date_array[i] = unlock_dates[i];
-            unlock_date_array[i] = parseInt(unlock_date_array[i].split("-").join(""));
-        }
+			unlock_date_array[i] = unlock_dates[i];
+			unlock_date_array[i] = parseInt(unlock_date_array[i].split("-").join(""));
+		}
 
         var now_date = new Date();
         if (parseInt(unlock_date_array[0] / 100) < now_date.getFullYear() * 100 + now_date.getMonth() + 1) {
@@ -566,10 +562,10 @@ AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
         var user_collection = AV.Object.extend("_User");
         var user_obj = new user_collection();
         var kaka_worker_time_collection = AV.Object.extend('kaka_worker_time');
-        var unlock_date_query = new AV.Query("kaka_worker_time");
+		var unlock_date_query = new AV.Query("kaka_worker_time");
         user_obj.id = request.params.user_id;
         unlock_date_query.equalTo("worker", user_obj);
-        unlock_date_query.containedIn("date" , unlock_date_array);
+		unlock_date_query.containedIn("date" , unlock_date_array);
 
         var worker_time = [];
         unlock_date_query.find ({
@@ -610,31 +606,31 @@ AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
                         //reject(ERROR_MSG.ERR_DATE_LOCK_FAILED);
                         response.error(error);
                     }
-                });     
+                });	 
             }, 
             error : function(error) {
                 response.error(error);
             }
         });
-    };
-        
-    /**
-    * 加锁日期数据检查
-    *
-    */
-    var check_lock_dates = function(mode) {
+	};
+		
+	/**
+	* 加锁日期数据检查
+	*
+	*/
+	var check_lock_dates = function(mode) {
         var lock_dates = request.params.lock_dates;
-        var lock_date_len = lock_dates.length;
-        var lock_date_params = [];
+		var lock_date_len = lock_dates.length;
+		var lock_date_params = [];
 
-        for(var i = 0 ; i < lock_date_len ; i++){
-            lock_date_params[i] = lock_dates[i];
-            lock_date_params[i] = parseInt(lock_date_params[i].split("-").join(""));
-        }
+		for(var i = 0 ; i < lock_date_len ; i++){
+			lock_date_params[i] = lock_dates[i];
+			lock_date_params[i] = parseInt(lock_date_params[i].split("-").join(""));
+		}
 
-        var lock_date_query = new AV.Query("kaka_worker_time");
-        lock_date_query.containedIn("date" , lock_date_params);
-    
+		var lock_date_query = new AV.Query("kaka_worker_time");
+		lock_date_query.containedIn("date" , lock_date_params);
+	
         lock_date_query.find({
             success : function(results) {
                 if (results.length === 0) {
@@ -655,15 +651,15 @@ AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
                 response.error();
             }
         });
-    };
-        
+	};
+		
     /**
-    * 解锁日期数据检查
-    *
-    */
-    var check_unlock_dates = function(mode) {
+	* 解锁日期数据检查
+	*
+	*/
+	var check_unlock_dates = function(mode) {
         var unlock_dates = request.params.unlock_dates;
-        var unlock_date_num = unlock_dates.length;
+	    var unlock_date_num = unlock_dates.length;
 
         if (typeof(unlock_dates) == "undefined") {
             response.success(ERROR_MSG.ERR_DATE_STYLE);
@@ -676,15 +672,15 @@ AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
             }
         }
 
-        var unlock_date_params = [];    
+		var unlock_date_params = [];	
         for (var i = 0 ; i < unlock_date_num ; i++) {
-            unlock_date_params[i] = unlock_dates[i];
-            unlock_date_params[i] = parseInt(unlock_date_params[i].split("-").join(""))
-        }
-        
+			unlock_date_params[i] = unlock_dates[i];
+			unlock_date_params[i] = parseInt(unlock_date_params[i].split("-").join(""))
+		}
+		
         var unlock_dates_query = new AV.Query("kaka_worker_time");
-        unlock_dates_query.containedIn("date", unlock_date_params);
-        unlock_dates_query.equalTo("preorder", 1);
+		unlock_dates_query.containedIn("date", unlock_date_params);
+		unlock_dates_query.equalTo("preorder", 1);
 
         unlock_dates_query.find({
             success : function(results) {
@@ -724,13 +720,13 @@ AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
                 }
             }, 
             error : function(error) {
-                response.error(error);
-            }
+			    response.error(error);
+		    }
         });
-    }
-        
-    // 参数验证
-    if (!check_request_params_style(request, response)) {
+	}
+		
+	// 参数验证
+	if (!check_request_params_style(request, response)) {
         return;
     }
 
@@ -746,5 +742,145 @@ AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
         }
     }
 
-    check_lock_dates(mode);
+	check_lock_dates(mode);
+});
+
+/**
+* brief   : 添加评论,更新计数器
+* @param  : request - 
+*           comment:{"counter_id" : "558e6feae4b035e183fc1975", "user_id" : "555c2822e4b0b7e69366b104", "comment" : "test comment", "belong_id" : "555c2d55e4b0b7e69366d64a", "belong_type" : "product"} 
+*           zan:{"counter_id" : "558e6feae4b035e183fc1975", "zan":"1"} 
+*           favorite:{"counter_id" : "558e6feae4b035e183fc1975", "user_id" : "555c2822e4b0b7e69366b104", "favorite" : "1", "belong_id" : "555c2d55e4b0b7e69366d64a", "belong_type" : "product"}
+*           request - define error, result or system error
+*           {"result":"{"state":"error", "code":20, "msg":"belong type必填}"}
+* @return : success - RET_OK
+*           error - define error or system error
+*/ 
+AV.Cloud.define('uphold_counter_and_comment', function(request , response) {
+	var params = request.params;
+    var comment = params.comment;
+    var favorite = params.favorite;
+    var zan = params.zan;
+    var share = params.share;
+    var counter_id = params.counter_id;
+    var user_id = params.user_id;
+    var belong_id = params.belong_id;
+    var belong_type = params.belong_type;
+    var grade = params.grade;
+    
+    if (typeof(counter_id) == "undefined" || counter_id.length === 0) {
+		response.success(ERROR_MSG.ERR_COUNTERID_MUST_HAVE);
+		return;
+    }
+
+    var kaka_counter = AV.Object.extend("kaka_counter");
+    var query = new AV.Query(kaka_counter);
+      
+    if (typeof(comment) != "undefined" && comment.length > 0) {
+        if (typeof(user_id) == "undefined" || user_id.length === 0) {
+            response.success(ERROR_MSG.ERR_USERID_MUST_HAVE);
+            return;
+        }
+        
+        if (typeof(belong_id) == "undefined" || belong_id.length === 0) {
+            response.success(ERROR_MSG.ERR_BELONGERID_MUST_HAVE);
+            return;
+        }
+        
+        if (typeof(belong_type) == "undefined" || belong_type.length === 0) {
+            response.success(ERROR_MSG.ERR_BELONGERTYPE_MUST_HAVE);
+            return;
+        }
+
+        var kaka_comment = AV.Object.extend("kaka_comment");
+        var kaka_comment_obj = new kaka_comment();
+        var kaka_user = AV.Object.extend("_User");
+        var kaka_user_obj = new kaka_user();
+        kaka_user_obj.id = user_id;
+        kaka_comment_obj.set("belong_user", kaka_user_obj);
+        kaka_comment_obj.set("text", comment);
+
+        if ("worker" == belong_type) {
+            kaka_user_obj.id = belong_id;
+            kaka_comment_obj.set("belong_worker", kaka_user_obj);
+        }
+        else if ("product" == belong_type) {
+            var kaka_product = AV.Object.extend("kaka_product");
+            var kaka_product_obj = new kaka_product();
+            kaka_product_obj.id = belong_id;
+            kaka_comment_obj.set("belong_product", kaka_product_obj);
+        }
+        else if ("trade" == belong_type) {
+            var kaka_trade = AV.Object.extend("kaka_trade");
+            var kaka_trade_obj = new kaka_trade();
+            kaka_trade_obj.id = belong_id;
+            kaka_comment_obj.set("belong_trade", kaka_trade_obj);
+        }
+        kaka_comment_obj.save();
+
+        query.get(counter_id, {
+            success : function (kaka_counter) {
+                kaka_counter.increment("comment");
+                kaka_counter.save();
+			    response.success(RESULT_MSG.RET_OK);
+            },
+            error : function(kaka_counter, error) {
+                response.error(error);
+            }
+        });
+    }
+    
+    if (typeof(favorite) != "undefined" && favorite.length > 0) {
+        var kaka_favorite = AV.Object.extend("kaka_favorite");
+        var kaka_favorite_obj = new kaka_favorite();
+        var kaka_user = AV.Object.extend("_User");
+        var kaka_user_obj = new kaka_user();
+        kaka_user_obj.id = user_id;
+        kaka_favorite_obj.set("user", kaka_user_obj);
+
+        if ("product" == belong_type) {
+            var kaka_product = AV.Object.extend("kaka_product");
+            var kaka_product_obj = new kaka_product();
+            kaka_product_obj.id = belong_id;
+            kaka_favorite_obj.set("product", kaka_product_obj);
+        }
+        kaka_favorite_obj.save();
+
+        query.get(counter_id, {
+            success : function (kaka_counter) {
+                kaka_counter.increment("favorite");
+                kaka_counter.save();
+			    response.success(RESULT_MSG.RET_OK);
+            },
+            error : function(kaka_counter, error) {
+                response.error(error);
+            }
+        });
+    }
+    
+    if (typeof(zan) != "undefined" && zan.length > 0) {
+        query.get(counter_id, {
+            success : function (kaka_counter) {
+                kaka_counter.increment("zan");
+                kaka_counter.save();
+			    response.success(RESULT_MSG.RET_OK);
+            },
+            error : function(kaka_counter, error) {
+                response.error(error);
+            }
+        });
+    }
+    
+    if (typeof(share) != "undefined" && share.length > 0) {
+        query.get(counter_id, {
+            success : function (kaka_counter) {
+                kaka_counter.increment("share");
+                kaka_counter.save();
+			    response.success(RESULT_MSG.RET_OK);
+            },
+            error : function(kaka_counter, error) {
+                response.error(error);
+            }
+        });
+    }        
 });
