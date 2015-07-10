@@ -61,6 +61,10 @@ AV.Cloud.define('kaka_register', function(request, response) {
                 if (typeof(username) == "undefined" || username.length === 0) {
                     user_obj.set("username", request.params.mobilePhoneNumber);
                 }
+                else {
+                    user_obj.set("username", username);
+                }
+
                 user_obj.set("mobilePhoneNumber", request.params.mobilePhoneNumber);
                 user_obj.set("password", request.params.password);
                 user_obj.signUp(null, {
