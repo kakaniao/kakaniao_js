@@ -19,7 +19,8 @@ var ERROR_MSG = {
     'ERR_MODE_MUST_HAVE':'{"state":"error", "code":17, "msg":"时间请求模式必须有"}',
     'ERR_COUNTERID_MUST_HAVE':'{"state":"error", "code":18, "msg":"counter ID必填"}', 
     'ERR_BELONGID_MUST_HAVE':'{"state":"error", "code":19, "msg":"belong ID必填"}',
-    'ERR_BELONGTYPE_MUST_HAVE':'{"state":"error", "code":20, "msg":"belong type必填"}'
+    'ERR_BELONGTYPE_MUST_HAVE':'{"state":"error", "code":20, "msg":"belong type必填"}',
+    'ERR_PID_MUST_HAVE':'{"state":"error", "code":21, "msg":"product ID必填"}', 
 }; 
 
 var RESULT_MSG = {
@@ -148,28 +149,80 @@ AV.Cloud.define('kaka_get_workertime', function(request, response) {
 
 /**
 * brief   : 获取摄影师集合
-* @param  : request - {}
+* @param  : request - {"pid":"555c2d55e4b0b7e69366d64a", "global":0, "type":"product","worker_role":"cameraman"}
 *           response - return
 * @return : results -query result array
 *           ERROR  - system error or define error
 */
 AV.Cloud.define('kaka_get_worker_cameraman', function(request, response) {
-    var role_collection = AV.Object.extend("_Role");
-    var role_obj = new role_collection();
-    var worker_query = new AV.Query("_User");
+    var pid = request.params.pid;
+    var type = request.params.type;
+    var global = request.params.global;
+    var worker_role = request.params.worker_role;
+    var query;
+ 
+    console.log("pid", pid);
+    console.log("type", type);
+    console.log("global", global);
+    console.log("worker_role", worker_role);
 
-    role_obj.id = "555c2a42e4b0b7e69366bff2";
-    worker_query.equalTo("role", role_obj);
-    worker_query.include('icon');
+    if (1 === global) {
+        var role_collection = AV.Object.extend("_Role");
+        var role_obj = new role_collection();
+        query = new AV.Query("_User");
+
+        if ("cameraman" === worker_role) {
+            role_obj.id = "555c2a42e4b0b7e69366bff2";
+        }
+        
+        query.equalTo("role", role_obj);
+        query.include('icon');
+    }
+    else if (0 === global) {
+        if (typeof(pid) == "undefined" || pid.length === 0) {
+            response.success(ERROR_MSG.ERR_PID_MUST_HAVE);
+            return;
+        }
+
+        if ("product" === type) {
+           query = new AV.Query("kaka_product");
+           query.equalTo("objectId", pid);
+           //worker_query = AV.Relation.reverseQuery('_User', 'worker', kaka_product_obj);
+           //worker_query.include('icon');
+        }
+    }
     
-    worker_query.find ({
+    query.find ({
         success : function(results) {
             var result_num = results.length;
-            for (var i = 0; i < result_num; i++) {
-                results[i].set("icon", JSON.stringify(results[i].get('icon')));
+            if (1 === global) {
+                for (var i = 0; i < result_num; i++) {
+                    results[i].set("icon", JSON.stringify(results[i].get('icon')));
+                }
+               
+                response.success(results);
             }
+            else if (0 === global) { 
+                var kaka_product_obj = results[0];
+                var relation = kaka_product_obj.relation("worker");
+                //relation.targetClassName = "_User";
+                var worker_relation_query = relation.query();
+                worker_relation_query.include('icon');
 
-            response.success(results);
+                worker_relation_query.find ({
+                    success : function(results) {
+                        var result_num = results.length;
+                        console.log("relation query reuslt", result_num);
+                        for (var i = 0; i < result_num; i++) {
+                            results[i].set("icon", JSON.stringify(results[i].get('icon')));
+                        }
+                        response.success(results);
+                    },
+                    error : function(error) {
+                        response.error(error);
+                    }
+                });
+            }
         },
         error : function(error) {
             response.error(error);
