@@ -10,18 +10,20 @@ var ERROR_MSG = {
     'ERR_LOCK_DATE_NO_CONTINUE':'{"state":"error", "code":8, "msg":"加锁日期不连续"}', 
     'ERR_UNLOCK_DATE_NO_CONTINUE':'{"state":"error", "code":9, "msg":"解锁日期不连续"}', 
     'ERR_LOCK_DATE_MUST_HAVE':'{"state":"error", "code":10, "msg":"加锁日期必填"}', 
-    'ERR_TIME_NO_UNLOCK':'{"state":"error", "code":11, "msg":"所选时间段不能被解锁"}', 
-    'ERR_TIME_NO_LOCK':'{"state":"error", "code":12, "msg":"所选时间段不能被锁定"}',
-    'ERR_LOCK_UNLOC_NO_MATCHING':'{"state":"error", "code":13, "msg":"所选时间段锁定与解锁不匹配"}',
-    'ERR_DATE_STYLE':'{"state":"error", "code":14, "msg":"时间样式错误"}',
-    'ERR_UNLOCK_DATE_OVERDUE':'{"state":"error", "code":15, "msg":"解锁时间样已过期"}',
-    'ERR_MODE_STYLE':'{"state":"error", "code":16, "msg":"模式样式错误"}',
-    'ERR_MODE_MUST_HAVE':'{"state":"error", "code":17, "msg":"时间请求模式必须有"}',
-    'ERR_COUNTERID_MUST_HAVE':'{"state":"error", "code":18, "msg":"counter ID必填"}', 
-    'ERR_BELONGID_MUST_HAVE':'{"state":"error", "code":19, "msg":"belong ID必填"}',
-    'ERR_BELONGTYPE_MUST_HAVE':'{"state":"error", "code":20, "msg":"belong type必填"}',
-    'ERR_PID_MUST_HAVE':'{"state":"error", "code":21, "msg":"product ID必填"}', 
+    'ERR_UNLOCK_DATE_MUST_HAVE':'{"state":"error", "code":11, "msg":"无解锁日期"}', 
+    'ERR_TIME_NO_UNLOCK':'{"state":"error", "code":12, "msg":"所选时间段不能被解锁"}', 
+    'ERR_TIME_NO_LOCK':'{"state":"error", "code":13, "msg":"所选时间段不能被锁定"}',
+    'ERR_LOCK_UNLOC_NO_MATCHING':'{"state":"error", "code":14, "msg":"所选时间段锁定与解锁不匹配"}',
+    'ERR_DATE_STYLE':'{"state":"error", "code":15, "msg":"时间样式错误"}',
+    'ERR_UNLOCK_DATE_OVERDUE':'{"state":"error", "code":16, "msg":"解锁时间样已过期"}',
+    'ERR_MODE_STYLE':'{"state":"error", "code":17, "msg":"模式样式错误"}',
+    'ERR_MODE_MUST_HAVE':'{"state":"error", "code":18, "msg":"时间请求模式必须有"}',
+    'ERR_COUNTERID_MUST_HAVE':'{"state":"error", "code":19, "msg":"counter ID必填"}', 
+    'ERR_BELONGID_MUST_HAVE':'{"state":"error", "code":20, "msg":"belong ID必填"}',
+    'ERR_BELONGTYPE_MUST_HAVE':'{"state":"error", "code":21, "msg":"belong type必填"}',
+    'ERR_PID_MUST_HAVE':'{"state":"error", "code":22, "msg":"product ID必填"}'
 }; 
+
 
 var RESULT_MSG = {
     'RET_FAIL':'{"state":"failed", "code":0, "msg":"失败"}',
@@ -680,18 +682,32 @@ AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
         var lock_date_len = lock_dates.length;
         var lock_date_params = [];
 
+        var unlock_dates = request.params.unlock_dates;
+        var unlock_date_len = unlock_dates.length;
+        
         for(var i = 0 ; i < lock_date_len ; i++){
             lock_date_params[i] = lock_dates[i];
             lock_date_params[i] = parseInt(lock_date_params[i].split("-").join(""));
         }
 
+        var user_collection = AV.Object.extend("_User");
+        var user_obj = new user_collection();
+        user_obj.id = request.params.user_id;
+        
         var lock_date_query = new AV.Query("kaka_worker_time");
+        lock_date_query.equalTo("worker", user_obj);
         lock_date_query.containedIn("date" , lock_date_params);
     
         lock_date_query.find({
             success : function(results) {
                 if (results.length === 0) {
-                    sync_workertime_lock(lock_dates, true);
+                    if (0 === unlock_date_len) {
+                        sync_workertime_lock(lock_dates, true);
+                    }
+                    else if (0 < unlock_date_len) {
+                        check_unlock_dates(mode);
+                    }
+
                 }
                 else {
                     var results_num = results.length;
@@ -701,7 +717,13 @@ AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
                             return;
                         }
                     }
-                    check_unlock_dates(mode);
+                    
+                    if (0 === unlock_date_len) {
+                        sync_workertime_lock(lock_dates, true);
+                    }
+                    else if (0 < unlock_date_len) {
+                        check_unlock_dates(mode);
+                    }
                 }
             },
             error : function(error) {
@@ -724,7 +746,7 @@ AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
         }
         else {
             if (unlock_date_num === 0) {
-                response.success(ERROR_MSG.ERR_LOCK_DATE_MUST_HAVE);
+                response.success(ERROR_MSG.ERR_UNLOCK_DATE_MUST_HAVE);
                 return; 
             }
         }
@@ -735,7 +757,12 @@ AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
             unlock_date_params[i] = parseInt(unlock_date_params[i].split("-").join(""))
         }
         
+        var user_collection = AV.Object.extend("_User");
+        var user_obj = new user_collection();
+        user_obj.id = request.params.user_id;
+        
         var unlock_dates_query = new AV.Query("kaka_worker_time");
+        unlock_dates_query.equalTo("worker", user_obj);
         unlock_dates_query.containedIn("date", unlock_date_params);
         unlock_dates_query.equalTo("preorder", 1);
 
