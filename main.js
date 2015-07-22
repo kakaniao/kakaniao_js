@@ -384,7 +384,7 @@ var check_request_params_style = function(request, response, action) {
 * brief   : 同步(异步)摄影师多个日期加解锁
 * @param  : request - {"user_id" : "555c2822e4b0b7e69366b104","unlock_dates":
 *           ["2015-06-01","2015-06-02"],"lock_dates":["2015-06-28","2015-06-29"],
-*           "mode":"sync"}
+*           "mode":"sync", "action":"lock"}
 *           request - define error, result or system error
 *           {"result":"{"state":"error","code":2,"msg":"当前日期已被预约，您来晚一步"}"}
 * @return : success - RET_OK
