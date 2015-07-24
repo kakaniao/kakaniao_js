@@ -378,6 +378,38 @@ var check_request_params_style = function(request, response, action) {
 };
 
 /**
+* brief   : 发送订单短信
+* @param  : request -{"user_id" : "555c28b8e4b0b7e69366b482"}
+*           reponse - define error, result or system error
+*           {"result":"{"state":"error", "code":20, "msg":"xxxx"}"}
+* @return : success - RET_OK
+*           error - define error or system error
+*/
+var send_trade_sms = function(user_id) { 
+    if (typeof(user_id) == "undefined" || user_id.length === 0) {
+        response.success(ERROR_MSG.ERR_USERID_MUST_HAVE);
+        return;
+    }
+
+    var user = AV.Object.extend("_User");
+    var query = new AV.Query(user);
+    
+    query.get(user_id, {
+        success : function(user_obj) {
+            mobile = user_obj.get("mobilePhoneNumber");
+            AV.Cloud.requestSmsCode({
+                mobilePhoneNumber:mobile,
+                template:"worker_trade"
+            }).then(function() {
+            },function(error) {
+            });
+        },
+        error : function(user_obj, error) {
+        }
+    });
+};
+
+/**
 * brief   : 同步(异步)摄影师多个日期加解锁
 * @param  : request - {"user_id" : "555c2822e4b0b7e69366b104","unlock_dates":
 *           ["2015-06-01","2015-06-02"],"lock_dates":["2015-06-28","2015-06-29"],
@@ -1004,7 +1036,7 @@ AV.Cloud.define('kaka_set_workertime_lock', function(request , response) {
 
 /**
 * brief   : 预约日期确定
-* @param  : request -{"user_id" : "555c28b8e4b0b7e69366b482" , "unlock_dates" : [], "lock_dates" : ["2015-07-22","2015-07-24"], "mode":"sync", "action":"lock"}
+* @param  : request -{"user_id" : "555c28b8e4b0b7e69366b482" , "unlock_dates" : [], "lock_dates" : ["2015-07-22","2015-07-23"], "mode":"sync", "action":"lock"}
 *           reponse - define error, result or system error
 *           {"result":"{"state":"error", "code":20, "msg":"belong type必填}"}
 * @return : success - RET_OK
@@ -1053,6 +1085,8 @@ AV.Cloud.define('kaka_preorder_time_sure', function(request , response) {
                         worker_time[i].save();
                     }
                         
+                    send_trade_sms(user_obj.id);
+
                     response.success(RESULT_MSG.RET_OK);
                 }
             },
