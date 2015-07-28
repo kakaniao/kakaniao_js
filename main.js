@@ -27,8 +27,10 @@ var ERROR_MSG = {
     'ERR_PREORDER_LOCK_DATE_NO_EXIST':'{"state":"error", "code":25, "msg":"此预订日期不存在"}',
     'ERR_HIDE_LOCK_DATE_NO_EXIST':'{"state":"error", "code":26, "msg":"屏蔽日期某一天不可屏蔽"}',
     'ERR_USER_NO_EXITS':'{"state":"error", "code":27, "msg":"用户不存在"}',
-    'ERR_FILEID_MUST_HAVE':'{"state":"error", "code":28, "msg":"用户ID必填"}',
-    'ERR_FILE_TYPE_MUST_HAVE':'{"state":"error", "code":28, "msg":"用户ID必填"}'
+    'ERR_FILEID_MUST_HAVE':'{"state":"error", "code":28, "msg":"文件ID必填"}',
+    'ERR_FILE_NAME_MUST_HAVE':'{"state":"error", "code":29, "msg":"文件名必填"}',
+    'ERR_FILE_DATA_MUST_HAVE':'{"state":"error", "code":30, "msg":"文件数据必填"}',
+    'ERR_FILE_TYPE_MUST_HAVE':'{"state":"error", "code":31, "msg":"文件类型必填"}'
 }; 
 
 var RESULT_MSG = {
@@ -1310,15 +1312,16 @@ AV.Cloud.define('kaka_uphold_counter_and_comment', function(request , response) 
 
 /**
 * brief   : 上传图片(头像)
-* @param  : request -{"user_id" : "555c28b8e4b0b7e69366b482" , "file_id":"xxxxx", "type":2}
+* @param  : request -{"user_id" : "555c28b8e4b0b7e69366b482" , "file_name":"xxxxx", "file_base64":"xxxxx", "type":2}
 *           reponse - define error, result or system error
 *           {"result":"{"state":"error", "code":20, "msg":"belong type必填}"}
 * @return : success - RET_OK
 *           error - define error or system error
 */
-AV.Cloud.define('kaka_upload_file', function(request , response) {
+AV.Cloud.define('kaka_upload_file', function(request, response) {
     var user_id = request.params.user_id;
-    var file_id = request.params.file_id
+    var file_name = request.params.file_name;
+    var file_base64 = request.params.file_base64;
     var type = request.params.type;
 
     if (typeof(user_id) == "undefined" || user_id.length === 0) {
@@ -1326,8 +1329,13 @@ AV.Cloud.define('kaka_upload_file', function(request , response) {
         return;
     }
 
-    if (typeof(file_id) == "undefined" || file_id.length === 0) {
-        response.success(ERROR_MSG.ERR_FILEID_MUST_HAVE);
+    if (typeof(file_name) == "undefined" || file_name.length === 0) {
+        response.success(ERROR_MSG.ERR_FILE_NAME_MUST_HAVE);
+        return;
+    }
+
+    if (typeof(file_base64) == "undefined" || file_base64.length === 0) {
+        response.success(ERROR_MSG.ERR_FILE_DATA_MUST_HAVE);
         return;
     }
 
@@ -1335,40 +1343,45 @@ AV.Cloud.define('kaka_upload_file', function(request , response) {
         response.success(ERROR_MSG.ERR_FILE_TYPE_MUST_HAVE);
         return;
     }
+    
+    var file_obj = new AV.File(file_name, { base64: file_base64 });
+    file_obj.metaData().mimeType = "image/jpeg";
+    file_obj.save().then(function(file_obj) {
+            var user = AV.Object.extend("_User");
+            var user_obj = new user();
+            user_obj.id = user_id;
 
-    var user = AV.Object.extend("_User");
-    var user_obj = new user();
-    user_obj.id = user_id;
+            var kaka_picture = AV.Object.extend("kaka_picture");
+            var kaka_picture_obj = new kaka_picture();
+            kaka_picture_obj.set("belong_user", user_obj);
+            kaka_picture_obj.set("picture", file_obj);
+            kaka_picture_obj.set("picture_type", type);
+            kaka_picture_obj.save(null, {
+                success : function(kaka_picture_obj) {
+                    console.log("kaka picture:", kaka_picture_obj.id);
+                    if (2 == type) {
+                        var query = new AV.Query(user);
+                        query.get(user_id, {
+                            success : function (user_obj) {
+                                user_obj.set("icon", kaka_picture_obj);
+                                user_obj.save();
 
-    var file = AV.Object.extend("_File");
-    var file_obj = new file();
-    file_obj.id = file_id;
-
-    var kaka_picture = AV.Object.extend("kaka_picture");
-    var kaka_picture_obj = new kaka_picture();
-    kaka_picture_obj.set("belong_user", user_obj);
-    kaka_picture_obj.set("picture", file_obj);
-    kaka_picture_obj.set("picture_type", type);
-    kaka_picture_obj.save(null, {
-        success : function(kaka_picture_obj) {
-            if (2 == type) {
-                var query = new AV.Query(user);
-                query.get(user_id, {
-                    success : function (user_obj) {
-                        user_obj.set("icon", kaka_picture_obj);
-                        user_obj.save();
-
-                        response.success(RESULT_MSG.RET_OK);
-                    },
-                    error : function (user_obj, error) {
-                        response.error(error);
+                                response.success(RESULT_MSG.RET_OK);
+                            },
+                            error : function (user_obj, error) {
+                                response.error(error);
+                            }
+                        });
                     }
-                });
-            }
+                },
+                error : function(kaka_picture_obj, error) {
+                    response.error(error);
+                }
+            });
         },
-        error : function(kaka_picture_obj, error) {
+        function(file_obj, error) {
             response.error(error);
         }
-    });
+    );    
 });
  
