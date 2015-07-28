@@ -26,7 +26,9 @@ var ERROR_MSG = {
     'ERR_C2S_UNLOCK_DATE_NO_MATCHING':'{"state":"error", "code":24, "msg":"移动端和服务器解锁日期不匹配"}', 
     'ERR_PREORDER_LOCK_DATE_NO_EXIST':'{"state":"error", "code":25, "msg":"此预订日期不存在"}',
     'ERR_HIDE_LOCK_DATE_NO_EXIST':'{"state":"error", "code":26, "msg":"屏蔽日期某一天不可屏蔽"}',
-    'ERR_USER_NO_EXITS':'{"state":"error", "code":26, "msg":"用户不存在"}'
+    'ERR_USER_NO_EXITS':'{"state":"error", "code":27, "msg":"用户不存在"}',
+    'ERR_FILEID_MUST_HAVE':'{"state":"error", "code":28, "msg":"用户ID必填"}',
+    'ERR_FILE_TYPE_MUST_HAVE':'{"state":"error", "code":28, "msg":"用户ID必填"}'
 }; 
 
 var RESULT_MSG = {
@@ -1305,3 +1307,68 @@ AV.Cloud.define('kaka_uphold_counter_and_comment', function(request , response) 
         });
     }        
 });
+
+/**
+* brief   : 上传图片(头像)
+* @param  : request -{"user_id" : "555c28b8e4b0b7e69366b482" , "file_id":"xxxxx", "type":2}
+*           reponse - define error, result or system error
+*           {"result":"{"state":"error", "code":20, "msg":"belong type必填}"}
+* @return : success - RET_OK
+*           error - define error or system error
+*/
+AV.Cloud.define('kaka_upload_file', function(request , response) {
+    var user_id = request.params.user_id;
+    var file_id = request.params.file_id
+    var type = request.params.type;
+
+    if (typeof(user_id) == "undefined" || user_id.length === 0) {
+        response.success(ERROR_MSG.ERR_USERID_MUST_HAVE);
+        return;
+    }
+
+    if (typeof(file_id) == "undefined" || file_id.length === 0) {
+        response.success(ERROR_MSG.ERR_FILEID_MUST_HAVE);
+        return;
+    }
+
+    if (typeof(type) == "undefined" || type.length === 0) {
+        response.success(ERROR_MSG.ERR_FILE_TYPE_MUST_HAVE);
+        return;
+    }
+
+    var user = AV.Object.extend("_User");
+    var user_obj = new user();
+    user_obj.id = user_id;
+
+    var file = AV.Object.extend("_File");
+    var file_obj = new file();
+    file_obj.id = file_id;
+
+    var kaka_picture = AV.Object.extend("kaka_picture");
+    var kaka_picture_obj = new kaka_picture();
+    kaka_picture_obj.set("belong_user", user_obj);
+    kaka_picture_obj.set("picture", file_obj);
+    kaka_picture_obj.set("picture_type", type);
+    kaka_picture_obj.save(null, {
+        success : function(kaka_picture_obj) {
+            if (2 == type) {
+                var query = new AV.Query(user);
+                query.get(user_id, {
+                    success : function (user_obj) {
+                        user_obj.set("icon", kaka_picture_obj);
+                        user_obj.save();
+
+                        response.success(RESULT_MSG.RET_OK);
+                    },
+                    error : function (user_obj, error) {
+                        response.error(error);
+                    }
+                });
+            }
+        },
+        error : function(kaka_picture_obj, error) {
+            response.error(error);
+        }
+    });
+});
+ 
