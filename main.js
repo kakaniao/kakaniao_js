@@ -1317,7 +1317,7 @@ AV.Cloud.define('kaka_uphold_counter_and_comment', function(request , response) 
 
 /**
 * brief   : 上传图片(头像)
-* @param  : request -{"user_id" : "555c28b8e4b0b7e69366b482" , "file_name":"xxxxx", "file_base64":"xxxxx", "type":2}
+* @param  : request -{"user_id" : "555c28b8e4b0b7e69366b482" , "file_name":"xxxxx", "file_base64":"xxxxx", "type":2, "old_icon_id":"yyyyyyy", "old_picture_id":"sssss"}
 *           reponse - define error, result or system error
 *           {"result":"{"state":"error", "code":20, "msg":"belong type必填}"}
 * @return : success - RET_OK
@@ -1328,6 +1328,8 @@ AV.Cloud.define('kaka_upload_file', function(request, response) {
     var file_name = request.params.file_name;
     var file_base64 = request.params.file_base64;
     var type = request.params.type;
+    var old_icon_id = request.params.old_icon_id;
+    var old_picture_id = request.params.old_picture_id;
 
     if (typeof(user_id) == "undefined" || user_id.length === 0) {
         response.success(ERROR_MSG.ERR_USERID_MUST_HAVE);
@@ -1370,12 +1372,45 @@ AV.Cloud.define('kaka_upload_file', function(request, response) {
                                 user_obj.set("icon", kaka_picture_obj);
                                 user_obj.save();
 
+                                if (typeof(old_icon_id) != "undefined" || old_icon_id.length != 0) {
+                                    var kaka_picture_query = new AV.Query(kaka_picture);
+                                    var icon_file = AV.Object.extend("_File");
+                                    var icon_file_obj = new icon_file();
+
+                                    kaka_picture_obj_old = new kaka_picture();
+                                    kaka_picture_query.get(old_picture_id, {
+                                        success : function(kaka_picture_obj_old) {
+                                            kaka_picture_obj_old.destroy({
+                                                success : function(kaka_picture_obj_old) {
+                                                    var file_query = new AV.Query(icon_file);
+                                                    file_query.get(old_icon_id, {
+                                                        success : function(icon_file_obj) {
+                                                            icon_file_obj.destroy({
+                                                                success : function(icon_file_obj) {
+                                                                },
+                                                                error : function(icon_file_obj) {
+                                                                }
+                                                            });
+                                                        },
+                                                        error : function(icon_file_obj, error) {
+                                                        }
+                                                    });
+                                                },
+                                                error : function(kaka_pictrue_obj_old, error) {
+                                                }
+                                            });
+                                        },
+                                        error : function(kaka_picture_obj, error) {
+                                        }
+                                    });
+                                }
+
                                 response.success(RESULT_MSG.RET_OK);
                             },
                             error : function (user_obj, error) {
                                 response.error(error);
                             }
-                        });
+                        });  
                     }
                 },
                 error : function(kaka_picture_obj, error) {
