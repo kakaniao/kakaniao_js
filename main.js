@@ -27,10 +27,11 @@ var ERROR_MSG = {
     'ERR_PREORDER_LOCK_DATE_NO_EXIST':'{"state":"error", "code":25, "msg":"此预订日期不存在"}',
     'ERR_HIDE_LOCK_DATE_NO_EXIST':'{"state":"error", "code":26, "msg":"屏蔽日期某一天不可屏蔽"}',
     'ERR_USER_NO_EXITS':'{"state":"error", "code":27, "msg":"用户不存在"}',
-    'ERR_FILEID_MUST_HAVE':'{"state":"error", "code":28, "msg":"文件ID必填"}',
-    'ERR_FILE_NAME_MUST_HAVE':'{"state":"error", "code":29, "msg":"文件名必填"}',
-    'ERR_FILE_DATA_MUST_HAVE':'{"state":"error", "code":30, "msg":"文件数据必填"}',
-    'ERR_FILE_TYPE_MUST_HAVE':'{"state":"error", "code":31, "msg":"文件类型必填"}'
+    'ERR_USER_PASSWD_MUST_HAVE':'{"state":"error", "code":28, "msg":"用户不存在"}',
+    'ERR_FILEID_MUST_HAVE':'{"state":"error", "code":29, "msg":"文件ID必填"}',
+    'ERR_FILE_NAME_MUST_HAVE':'{"state":"error", "code":30, "msg":"文件名必填"}',
+    'ERR_FILE_DATA_MUST_HAVE':'{"state":"error", "code":31, "msg":"文件数据必填"}',
+    'ERR_FILE_TYPE_MUST_HAVE':'{"state":"error", "code":32, "msg":"文件类型必填"}'
 }; 
 
 var RESULT_MSG = {
@@ -136,7 +137,7 @@ AV.Cloud.define('kaka_register', function(request, response) {
 * @return : RET_OK - success
 *           ERROR  - system error
 */
-AV.Cloud.define('kaka_post_user_info', function(request, response) {
+AV.Cloud.define('kaka_put_user_info', function(request, response) {
     var worker_role = request.params.worker_role;
     var mobile = request.params.mobile;
      
@@ -241,9 +242,13 @@ AV.Cloud.define('kaka_get_worker_cameraman', function(request, response) {
         if ("product" === type) {
            query = new AV.Query("kaka_product");
            query.equalTo("objectId", pid);
-           //worker_query = AV.Relation.reverseQuery('_User', 'worker', kaka_product_obj);
-           //worker_query.include('icon');
         }
+        
+        if ("script" === type) {
+           query = new AV.Query("kaka_script");
+           query.equalTo("objectId", pid);
+        }
+
     }
     
     query.find ({
@@ -1264,10 +1269,10 @@ AV.Cloud.define('kaka_uphold_counter_and_comment', function(request , response) 
         kaka_favorite_obj.set("user", kaka_user_obj);
 
         if ("product" == belong_type) {
-            var kaka_product = AV.Object.extend("kaka_product");
-            var kaka_product_obj = new kaka_product();
-            kaka_product_obj.id = belong_id;
-            kaka_favorite_obj.set("product", kaka_product_obj);
+            var kaka_combo = AV.Object.extend("kaka_combo");
+            var kaka_combo_obj = new kaka_combo();
+            kaka_combo_obj.id = belong_id;
+            kaka_favorite_obj.set("combo", kaka_combo_obj);
         }
         kaka_favorite_obj.save();
 
@@ -1358,7 +1363,6 @@ AV.Cloud.define('kaka_upload_file', function(request, response) {
             kaka_picture_obj.set("picture_type", type);
             kaka_picture_obj.save(null, {
                 success : function(kaka_picture_obj) {
-                    console.log("kaka picture:", kaka_picture_obj.id);
                     if (2 == type) {
                         var query = new AV.Query(user);
                         query.get(user_id, {
