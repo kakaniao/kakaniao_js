@@ -1404,8 +1404,10 @@ AV.Cloud.define('kaka_upload_file', function(request, response) {
                                         }
                                     });
                                 }
-
-                                response.success(RESULT_MSG.RET_OK);
+                                
+                                var json_obj = eval("("+RESULT_MSG.RET_OK+")");
+                                json_obj["picture"] = kaka_picture_obj;
+                                response.success(JSON.stringify(json_obj));
                             },
                             error : function (user_obj, error) {
                                 response.error(error);
