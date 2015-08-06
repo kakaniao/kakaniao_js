@@ -1240,6 +1240,13 @@ AV.Cloud.define('kaka_uphold_counter_and_comment', function(request , response) 
             kaka_product_obj.id = belong_id;
             kaka_comment_obj.set("belong_product", kaka_product_obj);
         }
+        else if ("script" == belong_type) {
+            var kaka_script = AV.Object.extend("kaka_script");
+            var kaka_script_obj = new kaka_script();
+            kaka_script_obj.id = belong_id;
+            kaka_comment_obj.set("belong_script", kaka_product_obj);
+        }
+
         else if ("trade" == belong_type) {
             var kaka_trade = AV.Object.extend("kaka_trade");
             var kaka_trade_obj = new kaka_trade();
@@ -1268,12 +1275,13 @@ AV.Cloud.define('kaka_uphold_counter_and_comment', function(request , response) 
         kaka_user_obj.id = user_id;
         kaka_favorite_obj.set("user", kaka_user_obj);
 
-        if ("product" == belong_type) {
+        if ("product" == belong_type || "script" == belong_type) {
             var kaka_combo = AV.Object.extend("kaka_combo");
             var kaka_combo_obj = new kaka_combo();
             kaka_combo_obj.id = belong_id;
             kaka_favorite_obj.set("combo", kaka_combo_obj);
         }
+
         kaka_favorite_obj.save();
 
         query.get(counter_id, {
