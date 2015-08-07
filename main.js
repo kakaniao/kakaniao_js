@@ -1244,7 +1244,7 @@ AV.Cloud.define('kaka_uphold_counter_and_comment', function(request , response) 
             var kaka_script = AV.Object.extend("kaka_script");
             var kaka_script_obj = new kaka_script();
             kaka_script_obj.id = belong_id;
-            kaka_comment_obj.set("belong_script", kaka_product_obj);
+            kaka_comment_obj.set("belong_script", kaka_script_obj);
         }
 
         else if ("trade" == belong_type) {
